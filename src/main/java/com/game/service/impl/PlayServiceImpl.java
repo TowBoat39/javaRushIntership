@@ -2,7 +2,6 @@ package com.game.service.impl;
 
 import com.game.entity.Player;
 import com.game.exceptions.BadRequestException;
-import com.game.exceptions.IdNotValidException;
 import com.game.exceptions.NotFoundException;
 import com.game.repository.PlayerRepository;
 import com.game.service.PlayerService;
@@ -35,34 +34,9 @@ public class PlayServiceImpl implements PlayerService {
     @Override
     public Player addPlayer(Player player) {
         Player player1 = new Player();
-        if (player.getName() == null) {
-            throw new IdNotValidException();
-            //TODO заменить эксепшены на нормальные
-        } else {
-            if (player.getName().length() > 12) {
-                throw new IdNotValidException();
-            } else {
-                player1.setName(player.getName());
-            }
-        }
-        if (player.getTitle().length() > 30) {
-            throw new IdNotValidException();
-        } else {
-            player1.setTitle(player.getTitle());
-        }
-        player1.setRace(player.getRace());
-        player1.setProfession(player.getProfession());
-        dataValidate(player.getBirthday());
-        player1.setBirthday(player.getBirthday());
-        player1.setBanned(player.getBanned());
-        if (player.getExperience() < 10000000) {
-            if (player.getExperience() > 0) {
-                player1.setExperience(player.getExperience());
-            } else throw new IdNotValidException();
-        } else throw new IdNotValidException();
-        player1.setLevel(player.calculateLevel());
-        player1.setUntilNextLevel(player.expUntilNextLevel());
-
+        if (player.getName() != null){
+            updatePlayer(player1, player);
+        }else throw new BadRequestException();
         return playerRepository.saveAndFlush(player1);
     }
 
@@ -125,8 +99,8 @@ public class PlayServiceImpl implements PlayerService {
     private void idValidate(long id) {
         if (id % 1 == 0) {
             if (id > 0) {
-            } else throw new IdNotValidException();
-        } else throw new IdNotValidException();
+            } else throw new BadRequestException();
+        } else throw new BadRequestException();
     }
 
     private void dataValidate(Date date) {
@@ -146,7 +120,7 @@ public class PlayServiceImpl implements PlayerService {
         if (dateRangeValidator.isWithInRange(mainDate)) {
 
         } else {
-            throw new IdNotValidException();
+            throw new BadRequestException();
         }
 
     }
