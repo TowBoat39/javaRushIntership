@@ -61,7 +61,7 @@ public class PlayerController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Player currentPlayer = playService.read(id);
-        if(isEmptyData(player)) return new ResponseEntity<>(currentPlayer, HttpStatus.OK);
+        if (isEmptyData(player)) return new ResponseEntity<>(currentPlayer, HttpStatus.OK);
 
         final Player updated = playService.updatePlayer(player, id);
         return updated != null
@@ -79,7 +79,6 @@ public class PlayerController {
 
         return result;
     }
-
 }
 
 

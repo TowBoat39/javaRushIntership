@@ -2,6 +2,8 @@ package com.game.entity;
 
 
 
+import org.springframework.lang.NonNull;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -9,6 +11,7 @@ import java.util.Date;
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NonNull
     private long id;
 
     private String name;
@@ -54,7 +57,7 @@ public class Player {
 
 
 
-    public Integer currentLevel(){
+    public Integer calculateLevel(){
         int result = 0;
         if (experience != null) {
             result =(int) ((Math.sqrt(2500 + 200 * experience)) - 50) / 100;
@@ -63,10 +66,10 @@ public class Player {
     }
 
     public Integer expUntilNextLevel() {
-        currentLevel();
+        calculateLevel();
         int result = 0;
         if (experience != null) {
-            result = 50 * (currentLevel() + 1) * (currentLevel() + 2) - experience;
+            result = 50 * (calculateLevel() + 1) * (calculateLevel() + 2) - experience;
         }
         return result;
     }

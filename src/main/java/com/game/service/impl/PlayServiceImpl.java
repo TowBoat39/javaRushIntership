@@ -1,6 +1,7 @@
 package com.game.service.impl;
 
 import com.game.entity.Player;
+import com.game.exceptions.BadRequestException;
 import com.game.exceptions.IdNotValidException;
 import com.game.exceptions.NotFoundException;
 import com.game.repository.PlayerRepository;
@@ -59,14 +60,14 @@ public class PlayServiceImpl implements PlayerService {
                 player1.setExperience(player.getExperience());
             } else throw new IdNotValidException();
         } else throw new IdNotValidException();
-        player1.setLevel(player.currentLevel());
+        player1.setLevel(player.calculateLevel());
         player1.setUntilNextLevel(player.expUntilNextLevel());
 
         return playerRepository.saveAndFlush(player1);
     }
 
     public Player read(long id) {
-        Optional<Player> player =playerRepository.findById(id);
+        Optional<Player> player = playerRepository.findById(id);
         if (!player.isPresent()) return null;
         return playerRepository.findById(id).get();
     }
@@ -82,42 +83,9 @@ public class PlayServiceImpl implements PlayerService {
     @Override
     public Player updatePlayer(Player player, long id) {
         idValidate(id);
-        Player player1 = playerRepository.findById(id).orElseThrow(NotFoundException::new);
-
-        if (player != null ) {
-            if (player.getName() != null) {
-                player1.setName(player.getName());
-            }
-            if (player.getTitle() != null) {
-                player1.setTitle(player.getTitle());
-            }
-            if (player.getRace() != null) {
-                player1.setRace(player.getRace());
-            }
-            if (player.getProfession() != null) {
-                player1.setProfession(player.getProfession());
-            }
-            if (player.getBirthday() != null) {
-                dataValidate(player.getBirthday());
-                player1.setBirthday(player.getBirthday());
-            }
-            player1.setBanned(player.getBanned());
-            if (player.getExperience() != null) {
-                if (player.getExperience() < 10000000) {
-                    if (player.getExperience() > 0) {
-                        player1.setExperience(player.getExperience());
-                    } else throw new IdNotValidException();
-                } else throw new IdNotValidException();
-            }
-            if (player.expUntilNextLevel() != null) {
-                player1.setUntilNextLevel(player.expUntilNextLevel());
-            }
-            if (player.currentLevel() != null) {
-                player1.setLevel(player.currentLevel());
-            }
-        }
-
-        return playerRepository.save(player1);
+        Player currentPlayer = playerRepository.findById(id).orElseThrow(NotFoundException::new);
+        updatePlayer(currentPlayer, player);
+        return playerRepository.save(currentPlayer);
 
     }
 
@@ -144,7 +112,7 @@ public class PlayServiceImpl implements PlayerService {
     }
 
     @Override
-    public Page<Player> getPlayerCount(int pageNumber, int pageSize,  String order) {
+    public Page<Player> getPlayerCount(int pageNumber, int pageSize, String order) {
         this.pageSize = pageSize;
         this.pageNumber = pageNumber;
         this.order = order;
@@ -154,14 +122,14 @@ public class PlayServiceImpl implements PlayerService {
         return page;
     }
 
-    public void idValidate(long id) {
+    private void idValidate(long id) {
         if (id % 1 == 0) {
             if (id > 0) {
             } else throw new IdNotValidException();
         } else throw new IdNotValidException();
     }
 
-    public void dataValidate(Date date) {
+    private void dataValidate(Date date) {
         Date dateBefore;
         Date dateAfter;
         Date mainDate;
@@ -175,15 +143,15 @@ public class PlayServiceImpl implements PlayerService {
             throw new RuntimeException(e);
         }
         DateRangeValidator dateRangeValidator = new DateRangeValidator(dateAfter, dateBefore);
-        if(dateRangeValidator.isWithinRange(mainDate)){
+        if (dateRangeValidator.isWithInRange(mainDate)) {
 
-        }else{
+        } else {
             throw new IdNotValidException();
         }
 
     }
 
-    public static class DateRangeValidator {
+    private static class DateRangeValidator {
 
         private final Date startDate;
         private final Date endDate;
@@ -193,11 +161,51 @@ public class PlayServiceImpl implements PlayerService {
             this.endDate = endDate;
         }
 
-        public boolean isWithinRange(Date testDate) {
+        public boolean isWithInRange(Date testDate) {
             return testDate.getTime() >= startDate.getTime() &&
                     testDate.getTime() <= endDate.getTime();
         }
 
+
+    }
+
+    private void updatePlayer(Player playerForUpdate, Player playerFromRequest){
+
+        if (playerFromRequest != null ) {
+            if (playerFromRequest.getName() != null) {
+                if(playerFromRequest.getName().length() <= 12){
+                    playerForUpdate.setName(playerFromRequest.getName());
+                }else throw new BadRequestException();
+            }
+            if (playerFromRequest.getTitle() != null) {
+                if(playerFromRequest.getTitle().length() <= 30){
+                    playerForUpdate.setTitle(playerFromRequest.getTitle());
+                }else throw new BadRequestException();
+
+            }
+            if (playerFromRequest.getRace() != null) {
+                playerForUpdate.setRace(playerFromRequest.getRace());
+            }
+            if (playerFromRequest.getProfession() != null) {
+                playerForUpdate.setProfession(playerFromRequest.getProfession());
+            }
+            if (playerFromRequest.getBirthday() != null) {
+                dataValidate(playerFromRequest.getBirthday());
+                playerForUpdate.setBirthday(playerFromRequest.getBirthday());
+            }
+            playerForUpdate.setBanned(playerFromRequest.getBanned());
+
+            if (playerFromRequest.getExperience() != null) {
+                if(playerFromRequest.getExperience() <= 10000000){
+                    if(playerFromRequest.getExperience() > 0){
+                        playerForUpdate.setExperience(playerFromRequest.getExperience());
+                    }else throw new BadRequestException();
+                }else throw new BadRequestException();
+
+            }
+                playerForUpdate.setLevel(playerForUpdate.calculateLevel());
+                playerForUpdate.setUntilNextLevel(playerForUpdate.expUntilNextLevel());
+        }
 
     }
 }
