@@ -19,11 +19,11 @@ import java.util.Optional;
 
 
 @Service
-public class PlayServiceImpl implements PlayerService {
+public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
 
-    public PlayServiceImpl(PlayerRepository playerRepository) {
+    public PlayerServiceImpl(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
     }
 
@@ -95,7 +95,6 @@ public class PlayServiceImpl implements PlayerService {
 
         return page;
     }
-
     private void idValidate(long id) {
         if (id % 1 == 0) {
             if (id > 0) {

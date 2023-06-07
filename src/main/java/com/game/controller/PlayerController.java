@@ -1,7 +1,7 @@
 package com.game.controller;
 
 import com.game.entity.Player;
-import com.game.service.impl.PlayServiceImpl;
+import com.game.service.impl.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,10 @@ import java.util.List;
 @RequestMapping("/rest/players")
 public class PlayerController {
 
-    public PlayServiceImpl playService;
+    public PlayerServiceImpl playService;
 
     @Autowired
-    public PlayerController(PlayServiceImpl playService) {
+    public PlayerController(PlayerServiceImpl playService) {
         this.playService = playService;
     }
 
